@@ -12,6 +12,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(cfg =>
     if (string.IsNullOrEmpty(connectionStrings)) throw new Exception("DATABASE_URL ENV not set.");
     cfg.UseNpgsql(connectionStrings);
 });
+builder.Services.AddStackExchangeRedisCache(cfg=>
+{
+    string? redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION");
+    if (string.IsNullOrEmpty(redisConnection)) throw new Exception("REDIS_CONNECTION ENV not set.");
+    cfg.Configuration = redisConnection;
+});
 builder.Services.AddRepositoriesDIExtension();
 builder.Services.AddServiceDIExtension();
 builder.Services.AddEndpointsApiExplorer();
