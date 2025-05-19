@@ -9,6 +9,9 @@ namespace EvacutionPlanningAndMonitoring.App.API.Models
         public int? TotalEvacuated { get; set; }
         public int? RemainingPeople { get; set; }
         public string LastVechicleUsed { get; set; } = string.Empty;
+        public string Operations { get; set; } = "Waiting";
+        public bool IsCompleted { get; set; } = false;
         public EvacutionZone? EvacutionZone { get; set; }
+
     }
 }
