@@ -9,8 +9,9 @@ public class EvacutionPlan : BaseModelDate
     public string ETA { get; set; } = string.Empty;
     public int? NumberOfPeople { get; set; }
 
-    public void ResetPlanAndStatus()
+    public void ResetPlan()
     {
+        this.UpdatedAt = DateTime.UtcNow;
         this.ETA = string.Empty;
         this.NumberOfPeople = 0;
     }

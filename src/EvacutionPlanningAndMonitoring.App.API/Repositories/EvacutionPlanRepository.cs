@@ -15,7 +15,13 @@ public class EvacutionPlanRepository(ApplicationDbContext context) : IEvacutionP
 
     public async Task<IEnumerable<EvacutionPlan>> SelectAllEvacutionPlanAsync()
     {
-        return await context.EvacutionPlans.ToListAsync();
+        return await context.EvacutionPlans.Include(x => x.EvacutionZone).ToListAsync();
+    }
+
+    public async Task<EvacutionPlan?> SelectEvacutionPlanByIdAsync(string zoneId, string vehicleId)
+    {
+        return await context.EvacutionPlans
+        .SingleOrDefaultAsync(x => x.ZoneID == zoneId && x.VehicleID == vehicleId);
     }
 
     public async Task<EvacutionPlan> UpdateEvacutionPlanAsync(EvacutionPlan evacutionPlan)

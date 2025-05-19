@@ -20,15 +20,15 @@ public class EvacutionsController(
     }
 
     [HttpGet("status")]
-    public async Task<IActionResult> GetStatus(int? page, int? limit, string? keyword)
+    public async Task<IActionResult> GetStatus()
     {
-        var result = await evavacutionStatusService.GetEvacutionStatusesAsync(page, limit, keyword);
+        var result = await evavacutionStatusService.GetEvacutionDefaultStatusesAsync();
         return new ObjectResult(result) { StatusCode = result.StatusCode };
     }
     [HttpPut("update")]
-    public async Task<IActionResult> UpdateStatus(EvacutionStatusDTO evacutionStatusDTO)
+    public async Task<IActionResult> UpdateStatus(EvacutionPlantUpdateDTO evacutionPlantUpdateDTO)
     {
-        var result = await evavacutionStatusService.UpdateEvacutionStatusAsync(evacutionStatusDTO);
+        var result = await evacutionPlanService.UpdatePlaneVehicleAndNumberOfPeopleEvacutedAsync(evacutionPlantUpdateDTO);
         return new ObjectResult(result) { StatusCode = result.StatusCode };
     }
     [HttpDelete("clear")]

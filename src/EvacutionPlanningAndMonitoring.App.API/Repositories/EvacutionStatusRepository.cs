@@ -6,6 +6,12 @@ namespace EvacutionPlanningAndMonitoring.App.API.Repositories;
 
 public class EvacutionStatusRepository(ApplicationDbContext context) : IEvacutionStatusRepository
 {
+    public async Task<IEnumerable<EvacutionStatus>> SelectAllEvacutionDefualtStatusAsync()
+    {
+        // throw new NotImplementedException();
+        return await context.EvacutionStatuses.Include(x=>x.EvacutionZone).OrderByDescending(x => x.EvacutionZone!.CreatedAt).ToListAsync();
+    }
+
     public async Task<IEnumerable<EvacutionStatus>> SelectAllEvacutionStatusAsync(int skip, int take, string? keyword)
     {
         var query = context.EvacutionStatuses.AsQueryable();

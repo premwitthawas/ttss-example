@@ -22,11 +22,11 @@ public class GlobalExceptionMiddleware(RequestDelegate next)
             ResponseDTO<string> body;
             if (ex.InnerException != null)
             {
-                body = new ResponseDTO<string>(true, 500, null, ex.InnerException.Message);
+                body = new ResponseDTO<string>(true, 500, ex.StackTrace, ex.InnerException.Message);
             }
             else
             {
-                body = new ResponseDTO<string>(true, 500, null, ex.Message);
+                body = new ResponseDTO<string>(true, 500, ex.StackTrace, ex.Message);
             }
             context.Response.StatusCode = 500;
             context.Response.ContentType = "application/json";

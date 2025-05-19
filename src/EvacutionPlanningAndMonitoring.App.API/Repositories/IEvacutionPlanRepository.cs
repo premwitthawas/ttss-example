@@ -7,5 +7,6 @@ public interface IEvacutionPlanRepository
     Task<EvacutionPlan> InsertEvacutionPlanAsync(EvacutionPlan evacutionPlan);
     Task<EvacutionPlan> UpdateEvacutionPlanAsync(EvacutionPlan evacutionPlan);
     Task<IEnumerable<EvacutionPlan>> SelectAllEvacutionPlanAsync();
+    Task<EvacutionPlan?> SelectEvacutionPlanByIdAsync(string zoneId,string vehicleId);
 
 }

@@ -29,16 +29,13 @@ public class EvacutionZoneService(IEvacutionZoneRepository evacutionZoneReposito
     public async Task<bool> FindPriorityUrgencyEvacutionZoneAsync(EvacutionZone evacutionZone)
     {
         var result = await evacutionZoneRepository.SelectEvacutionZonesAsync();
-        System.Console.WriteLine(JsonSerializer.Serialize(result.ToList()));
-        var zones = result.Where(x =>
-        x.UrgencyLevel > evacutionZone.UrgencyLevel
-        && x.EvacutionStatus!.RemainingPeople > 0)
-        .ToList();
-        System.Console.WriteLine(JsonSerializer.Serialize(zones));
-        if (zones.Count > 0)
-        {
-            return false;
-        }
-        return true;
+        var zones = result.ToList()
+        .OrderBy(x => x.CreatedAt)
+        .OrderByDescending(x => x.UrgencyLevel)
+        .Where(x => x.EvacutionStatus!.RemainingPeople != 0);
+        EvacutionZone zone = zones.ToArray()[0];
+        bool isFirstPriority = zone.Equals(evacutionZone);
+        return isFirstPriority;
+        // return false;
     }
 }

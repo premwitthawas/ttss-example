@@ -12,6 +12,7 @@ public static class ServiceDIExtension
         services.AddScoped<IEvacutionZoneService, EvacutionZoneService>();
         services.AddScoped<IEvavacutionStatusService, EvavacutionStatusService>();
         services.AddScoped<ICalculateDistanceHelper, CalculateDistanceHelper>();
+        services.AddScoped<ICachingEvacutionStatusService, CachingEvacutionStatusService>();
         return services;
     }
 }

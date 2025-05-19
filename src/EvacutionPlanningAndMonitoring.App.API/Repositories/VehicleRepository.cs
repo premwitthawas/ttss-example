@@ -22,4 +22,26 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
     {
         return await context.Vehicle.ToListAsync();
     }
+
+    public async Task<bool> UpdateIsUsedOfVehicleAsync(string id, bool status)
+    {
+        using var tx = await context.Database.BeginTransactionAsync();
+        try
+        {
+            Vehicle? vehicle = await SelectVehicleByIdAsync(id);
+            if (vehicle == null)
+            {
+                return false;
+            }
+            vehicle.IsUsed = status;
+            await context.SaveChangesAsync();
+            await tx.CommitAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await tx.RollbackAsync();
+            throw new Exception(ex.Message);
+        }
+    }
 };

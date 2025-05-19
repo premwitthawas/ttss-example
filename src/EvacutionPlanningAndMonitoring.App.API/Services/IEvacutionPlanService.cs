@@ -6,4 +6,6 @@ public interface IEvacutionPlanService
 {
     Task<ResponseDTO<EvacutionPlanDTO>> CreateEvacutionPlanAsync(EvacutionPlanDTO evacutionPlanDTO);
     Task ClearEvacutionPlansAsync();
+    Task<ResponseDTO<EvacutionPlanDTO>> UpdatePlaneVehicleAndNumberOfPeopleEvacutedAsync(EvacutionPlantUpdateDTO evacutionPlantUpdateDTO);
+
 }

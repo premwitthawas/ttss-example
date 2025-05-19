@@ -15,11 +15,11 @@ public class EvacutionZoneRepository(ApplicationDbContext context) : IEvacutionZ
 
     public async Task<EvacutionZone?> SelectEvacutionZoneByIdAsync(string id)
     {
-        return await context.EvacutionZones.SingleOrDefaultAsync(x => x.ZoneID == id);
+        return await context.EvacutionZones.Include(x=>x.EvacutionStatus).SingleOrDefaultAsync(x => x.ZoneID == id);
     }
 
     public async Task<IEnumerable<EvacutionZone>> SelectEvacutionZonesAsync()
     {
-        return await context.EvacutionZones.ToListAsync();
+        return await context.EvacutionZones.Include(x=>x.EvacutionStatus).ToListAsync();
     }
 }

@@ -8,4 +8,5 @@ public interface IVehicleRepository
     Task<Vehicle> InsertVehicleAsync(Vehicle vehicle);
     Task<Vehicle?> SelectVehicleByIdAsync(string id);
     Task<IEnumerable<Vehicle>> SelectVehiclesAsync();
+    Task<bool> UpdateIsUsedOfVehicleAsync(string id, bool status);
 };
