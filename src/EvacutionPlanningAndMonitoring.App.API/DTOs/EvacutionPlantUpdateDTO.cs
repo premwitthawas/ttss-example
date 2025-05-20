@@ -1,3 +1,11 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace EvacutionPlanningAndMonitoring.App.API.DTOs;
 
-public record EvacutionPlantUpdateDTO(string ZoneID, string VehicleID, int? NumberOfPeople);
+public record EvacutionPlantUpdateDTO(
+    [property: Required]
+    string ZoneID,
+    [property: Required]
+    string VehicleID,
+    int? NumberOfPeople
+    );

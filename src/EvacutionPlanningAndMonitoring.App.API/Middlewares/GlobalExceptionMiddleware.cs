@@ -12,21 +12,21 @@ public class GlobalExceptionMiddleware(RequestDelegate next)
         }
         catch (KeyNotFoundException notfoundEx)
         {
-            var body = new ResponseDTO<string>(true, 404, null, notfoundEx.Message);
+            var body = new ResponseDTO<string?>(true, 404, null, notfoundEx.Message);
             context.Response.StatusCode = 404;
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsJsonAsync(body);
         }
         catch (Exception ex)
         {
-            ResponseDTO<string> body;
+            ResponseDTO<string?> body;
             if (ex.InnerException != null)
             {
-                body = new ResponseDTO<string>(true, 500, ex.StackTrace, ex.InnerException.Message);
+                body = new ResponseDTO<string?>(true, 500, null, ex.InnerException.Message);
             }
             else
             {
-                body = new ResponseDTO<string>(true, 500, ex.StackTrace, ex.Message);
+                body = new ResponseDTO<string?>(true, 500, null, ex.Message);
             }
             context.Response.StatusCode = 500;
             context.Response.ContentType = "application/json";

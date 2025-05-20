@@ -2,6 +2,7 @@ using dotenv.net;
 using EvacutionPlanningAndMonitoring.App.API.Data;
 using EvacutionPlanningAndMonitoring.App.API.Extensions;
 using EvacutionPlanningAndMonitoring.App.API.Middlewares;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Formatting.Compact;
@@ -26,6 +27,10 @@ builder.Services.AddStackExchangeRedisCache(cfg =>
 });
 builder.Services.AddRepositoriesDIExtension();
 builder.Services.AddServiceDIExtension();
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var app = builder.Build();

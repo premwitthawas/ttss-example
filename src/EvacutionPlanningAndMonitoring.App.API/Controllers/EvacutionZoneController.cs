@@ -12,6 +12,15 @@ public class EvacutionZoneController(IEvacutionZoneService evacutionZoneService)
     [HttpPost]
     public async Task<IActionResult> CreateVehicle(EvacutionZoneDTO evacutionZoneDTO)
     {
+         if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+            var objectError = new ResponseDTO<List<string>>(false, 400, errors, null);
+            return new ObjectResult(objectError) { StatusCode = objectError.StatusCode };
+        }
         var result = await evacutionZoneService.CreateEvacutionZoneAsync(evacutionZoneDTO);
         return new ObjectResult(result) { StatusCode = result.StatusCode };
     }

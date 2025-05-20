@@ -9,9 +9,7 @@ namespace EvacutionPlanningAndMonitoring.App.API.Services;
 public class EvacutionPlanService(
     IEvacutionPlanRepository evacutionPlanRepository,
     ICalculateDistanceHelper calculateDistanceHelper,
-    IEvacutionZoneRepository evacutionZoneRepository,
     IEvacutionZoneService evacutionZoneService,
-    IVehicleRepository vehicleRepository,
     IVehicleService vehicleService,
     IEvavacutionStatusService evavacutionStatusService,
     ICachingEvacutionStatusService cachingEvacutionStatusService
@@ -25,7 +23,6 @@ public class EvacutionPlanService(
         {
             if (plan.EvacutionZone != null)
             {
-                System.Console.WriteLine("Clear ALL");
                 await evavacutionStatusService.UpdateRemainingReplacePeopleAsync(plan.ZoneID, plan.EvacutionZone.NumberOfPeople, plan.VehicleID);
                 await evavacutionStatusService.UpdateIsCompleteAsync(plan.ZoneID, false);
                 await evavacutionStatusService.UpdateIsOperationsWattingsAsync(plan.ZoneID);
@@ -40,12 +37,12 @@ public class EvacutionPlanService(
 
     public async Task<ResponseDTO<EvacutionPlanDTO>> CreateEvacutionPlanAsync(EvacutionPlanDTO evacutionPlanDTO)
     {
-        Vehicle? vehicle = await vehicleRepository.SelectVehicleByIdAsync(evacutionPlanDTO.VehicleID);
+        Vehicle? vehicle = await vehicleService.GetVehicleByIdAsync(evacutionPlanDTO.VehicleID);
         if (vehicle == null)
         {
             return new ResponseDTO<EvacutionPlanDTO>(true, 404, null, "Vehicle Not found.");
         }
-        EvacutionZone? evacutionZone = await evacutionZoneRepository.SelectEvacutionZoneByIdAsync(evacutionPlanDTO.ZoneID);
+        EvacutionZone? evacutionZone = await evacutionZoneService.GetEvacutionZoneByIdAsync(evacutionPlanDTO.ZoneID);
         if (evacutionZone == null)
         {
             return new ResponseDTO<EvacutionPlanDTO>(true, 404, null, "EvacutionZone Not found.");
@@ -99,7 +96,7 @@ public class EvacutionPlanService(
 
     public async Task<ResponseDTO<EvacutionPlanDTO>> UpdatePlaneVehicleAndNumberOfPeopleEvacutedAsync(EvacutionPlantUpdateDTO evacutionPlantUpdateDTO)
     {
-        Vehicle? vehicle = await vehicleRepository.SelectVehicleByIdAsync(evacutionPlantUpdateDTO.VehicleID);
+        Vehicle? vehicle = await vehicleService.GetVehicleByIdAsync(evacutionPlantUpdateDTO.VehicleID);
         if (vehicle == null)
         {
             return new ResponseDTO<EvacutionPlanDTO>(true, 404, null, "Vehicle Not found.");
@@ -108,7 +105,7 @@ public class EvacutionPlanService(
         {
             return new ResponseDTO<EvacutionPlanDTO>(true, 400, null, "Vehicle is not avaliable please try again next time.");
         }
-        EvacutionZone? evacutionZone = await evacutionZoneRepository.SelectEvacutionZoneByIdAsync(evacutionPlantUpdateDTO.ZoneID);
+        EvacutionZone? evacutionZone = await evacutionZoneService.GetEvacutionZoneByIdAsync(evacutionPlantUpdateDTO.ZoneID);
         if (evacutionZone == null)
         {
             return new ResponseDTO<EvacutionPlanDTO>(true, 404, null, "EvacutionZone Not found.");

@@ -22,6 +22,11 @@ public class VehicleService(IVehicleRepository vehicleRepository) : IVehicleServ
         return new ResponseDTO<VehicleDTO>(false, 201, vehicleDTO, null);
     }
 
+    public async Task<Vehicle?> GetVehicleByIdAsync(string vehicleID)
+    {
+        return await vehicleRepository.SelectVehicleByIdAsync(vehicleID);
+    }
+
     public async Task<Vehicle?> OptimizeCapacityVehicleToZone(EvacutionZone evacutionZone, int? capacity)
     {
         int? numberOfPeople = evacutionZone.EvacutionStatus!.RemainingPeople;

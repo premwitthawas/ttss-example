@@ -40,4 +40,9 @@ public class EvacutionZoneService(IEvacutionZoneRepository evacutionZoneReposito
         bool isFirstPriority = zone.Equals(evacutionZone);
         return isFirstPriority;
     }
+
+    public async Task<EvacutionZone?> GetEvacutionZoneByIdAsync(string zoneID)
+    {
+        return await evacutionZoneRepository.SelectEvacutionZoneByIdAsync(zoneID);
+    }
 }
