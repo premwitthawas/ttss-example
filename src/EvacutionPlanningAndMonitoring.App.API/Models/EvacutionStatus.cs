@@ -12,6 +12,5 @@ namespace EvacutionPlanningAndMonitoring.App.API.Models
         public string Operations { get; set; } = "Waiting";
         public bool IsCompleted { get; set; } = false;
         public EvacutionZone? EvacutionZone { get; set; }
-
     }
 }

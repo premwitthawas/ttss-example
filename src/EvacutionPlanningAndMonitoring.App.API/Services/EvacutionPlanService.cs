@@ -1,4 +1,3 @@
-using System.Text.Json;
 using EvacutionPlanningAndMonitoring.App.API.DTOs;
 using EvacutionPlanningAndMonitoring.App.API.Helpers;
 using EvacutionPlanningAndMonitoring.App.API.Models;
@@ -13,7 +12,8 @@ public class EvacutionPlanService(
     IEvacutionZoneService evacutionZoneService,
     IVehicleRepository vehicleRepository,
     IVehicleService vehicleService,
-    IEvavacutionStatusService evavacutionStatusService
+    IEvavacutionStatusService evavacutionStatusService,
+    ICachingEvacutionStatusService cachingEvacutionStatusService
     ) : IEvacutionPlanService
 {
     public async Task ClearEvacutionPlansAsync()
@@ -25,9 +25,12 @@ public class EvacutionPlanService(
             if (plan.EvacutionZone != null)
             {
                 await evavacutionStatusService.UpdateRemainingReplacePeopleAsync(plan.ZoneID, plan.EvacutionZone.NumberOfPeople, plan.VehicleID);
+                await evavacutionStatusService.UpdateIsCompleteAsync(plan.ZoneID,false);
+                await evavacutionStatusService.UpdateIsOperationsWattingsAsync(plan.ZoneID);
                 await vehicleService.UpdateVehicleStatusAsync(plan.VehicleID, false);
                 plan.ResetPlan();
                 await evacutionPlanRepository.UpdateEvacutionPlanAsync(plan);
+                await cachingEvacutionStatusService.RemoveEvacutionStatuseByZoneIdCaching(plan.ZoneID);
             }
         }
     }

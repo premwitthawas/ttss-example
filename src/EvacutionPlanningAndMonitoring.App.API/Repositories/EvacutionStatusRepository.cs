@@ -26,6 +26,11 @@ public class EvacutionStatusRepository(ApplicationDbContext context) : IEvacutio
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<string>> SelectAllIdsEvacutionDStatusAsync()
+    {
+        return await context.EvacutionStatuses.Select(x => x.ZoneID).AsNoTracking().ToListAsync();
+    }
+
     public async Task<EvacutionStatus?> SelectEvacutionStatusByIdAsync(string id)
     {
         return await context.EvacutionStatuses.SingleOrDefaultAsync(x => x.ZoneID == id);

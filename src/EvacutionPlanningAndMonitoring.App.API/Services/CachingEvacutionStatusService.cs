@@ -16,6 +16,7 @@ public class CachingEvacutionStatusService(IDistributedCache cache) : ICachingEv
         {
             return null;
         }
+        System.Console.WriteLine("Cache Hit 🎯 .");
         var data = JsonSerializer.Deserialize<ResponseEvacutionStatusDTO>(zoneStatusString);
         return data;
     }
@@ -48,7 +49,10 @@ public class CachingEvacutionStatusService(IDistributedCache cache) : ICachingEv
     public async Task SetEvacutionStatusByZoneId(ResponseEvacutionStatusDTO responseEvacutionStatusDTO)
     {
         await cache.SetStringAsync(_vacutionStatusesCacheKey + "_" + responseEvacutionStatusDTO.ZoneID,
-        JsonSerializer.Serialize(responseEvacutionStatusDTO));
+        JsonSerializer.Serialize(responseEvacutionStatusDTO),new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = _cacheExpiry
+        });
     }
 
     public async Task SetEvacutionStatusesCaching(List<EvacutionStatusDTO> evacutionStatusDTOs)

@@ -2,9 +2,9 @@ namespace EvacutionPlanningAndMonitoring.App.API.DTOs;
 
 public record ResponseEvacutionStatusDTO(
     string ZoneID,
-    int? RemainingPeopleEvacutaed,
+    int? RemaininPeople,
     string? Operations,
     bool IsCompleted,
     string? LastVechicleUsed,
-    string TotalEvacuted
+    int? TotalEvacuated
 );
