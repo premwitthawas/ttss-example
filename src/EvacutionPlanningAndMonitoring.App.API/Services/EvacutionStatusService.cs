@@ -1,7 +1,8 @@
-using System.Text.Json;
 using EvacutionPlanningAndMonitoring.App.API.DTOs;
 using EvacutionPlanningAndMonitoring.App.API.Models;
 using EvacutionPlanningAndMonitoring.App.API.Repositories;
+using Serilog;
+
 
 namespace EvacutionPlanningAndMonitoring.App.API.Services;
 
@@ -29,8 +30,9 @@ IEvavacutionStatusService
         }
         return new ResponseDTO<List<ResponseEvacutionStatusDTO>>(false, 200, lists, null);
     }
-    public async Task<ResponseDTO<EvacutionStatusDTO>> UpdateEvacutionStatusAsync(EvacutionStatusDTO evacutionStatusDTO)
+    public async Task<ResponseDTO<EvacutionStatusDTO>> UpdateEvacutionStatusServiceAsync(EvacutionStatusDTO evacutionStatusDTO)
     {
+        Log.Information($"Update Evacution Status ZoneId: {evacutionStatusDTO.ZoneID} | RemainingPeople : {evacutionStatusDTO.RemaininPeople} | Operations : {evacutionStatusDTO.Operations} | IsCompleted : {evacutionStatusDTO.IsCompleted}");
         var mapObject = new EvacutionStatus
         {
             ZoneID = evacutionStatusDTO.ZoneID,
@@ -59,6 +61,7 @@ IEvavacutionStatusService
 
     public async Task<bool> UpdateIsCompleteAsync(string zoneId, bool status)
     {
+        Log.Information($"Update Evacution Status ZoneId: {zoneId} | IsCompleted : {status}");
         var statusExist = await evacutionStatusRepository.SelectEvacutionStatusByIdAsync(zoneId);
         if (statusExist == null)
         {
@@ -66,7 +69,6 @@ IEvavacutionStatusService
         }
         statusExist.IsCompleted = status;
         var result = await evacutionStatusRepository.UpdateEvacutionStatusAsync(statusExist.ZoneID, statusExist);
-        System.Console.WriteLine(result.IsCompleted);
         var cacheHit = await cachingEvacutionStatusService.GetEvacutionStatusByZoneIdCaching(result.ZoneID);
         if (cacheHit != null)
         {
@@ -79,6 +81,7 @@ IEvavacutionStatusService
 
     public async Task<bool> UpdateIsOperationsCompleteAsync(string zoneId)
     {
+        Log.Information($"Update Evacution Status ZoneId: {zoneId} | Operations : Completed");
         var statusExist = await evacutionStatusRepository.SelectEvacutionStatusByIdAsync(zoneId);
         if (statusExist == null)
         {
@@ -98,6 +101,7 @@ IEvavacutionStatusService
 
     public async Task<bool> UpdateIsOperationsWattingsAsync(string zoneId)
     {
+        Log.Information($"Update Evacution Status ZoneId: {zoneId} | Operations : Waiting");
         var statusExist = await evacutionStatusRepository.SelectEvacutionStatusByIdAsync(zoneId);
         if (statusExist == null)
         {
@@ -134,8 +138,10 @@ IEvavacutionStatusService
         {
             statusExist.IsCompleted = true;
             statusExist.Operations = "Completed";
+            Log.Information($"Update Evacution Status ZoneId: {zoneId} | Operations : Completed | IsCompleted: true");
         }
         var result = await evacutionStatusRepository.UpdateEvacutionStatusAsync(statusExist.ZoneID, statusExist);
+        Log.Information($"Update Evacution Status ZoneId: {zoneId} | Remove-RemainingPeople : {people} | Result-RemainingPeople: {result.RemainingPeople} ");
         var cacheHit = await cachingEvacutionStatusService.GetEvacutionStatusByZoneIdCaching(result.ZoneID);
         if (cacheHit != null)
         {
@@ -155,6 +161,7 @@ IEvavacutionStatusService
         }
         statusExist.RemainingPeople = people;
         var result = await evacutionStatusRepository.UpdateEvacutionStatusAsync(statusExist.ZoneID, statusExist);
+        Log.Information($"Update Evacution Status ZoneId: {zoneId} | Add-RemainingPeople-Old : {people} ");
         var cacheHit = await cachingEvacutionStatusService.GetEvacutionStatusByZoneIdCaching(result.ZoneID);
         if (cacheHit != null)
         {

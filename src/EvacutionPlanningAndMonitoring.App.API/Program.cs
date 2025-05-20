@@ -3,7 +3,13 @@ using EvacutionPlanningAndMonitoring.App.API.Data;
 using EvacutionPlanningAndMonitoring.App.API.Extensions;
 using EvacutionPlanningAndMonitoring.App.API.Middlewares;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Formatting.Compact;
 DotEnv.Load();
+var log = new LoggerConfiguration()
+    .WriteTo.File(new CompactJsonFormatter(), "./Logs/log.json", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+Log.Logger = log;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddDbContext<ApplicationDbContext>(cfg =>
@@ -12,7 +18,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(cfg =>
     if (string.IsNullOrEmpty(connectionStrings)) throw new Exception("DATABASE_URL ENV not set.");
     cfg.UseNpgsql(connectionStrings);
 });
-builder.Services.AddStackExchangeRedisCache(cfg=>
+builder.Services.AddStackExchangeRedisCache(cfg =>
 {
     string? redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION");
     if (string.IsNullOrEmpty(redisConnection)) throw new Exception("REDIS_CONNECTION ENV not set.");

@@ -1,6 +1,8 @@
+using System.Text.Json;
 using EvacutionPlanningAndMonitoring.App.API.Data;
 using EvacutionPlanningAndMonitoring.App.API.Models;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace EvacutionPlanningAndMonitoring.App.API.Repositories;
 
@@ -9,7 +11,7 @@ public class EvacutionStatusRepository(ApplicationDbContext context) : IEvacutio
     public async Task<IEnumerable<EvacutionStatus>> SelectAllEvacutionDefualtStatusAsync()
     {
         // throw new NotImplementedException();
-        return await context.EvacutionStatuses.Include(x=>x.EvacutionZone).OrderByDescending(x => x.EvacutionZone!.CreatedAt).ToListAsync();
+        return await context.EvacutionStatuses.Include(x => x.EvacutionZone).OrderByDescending(x => x.EvacutionZone!.CreatedAt).ToListAsync();
     }
 
     public async Task<IEnumerable<EvacutionStatus>> SelectAllEvacutionStatusAsync(int skip, int take, string? keyword)
@@ -46,6 +48,8 @@ public class EvacutionStatusRepository(ApplicationDbContext context) : IEvacutio
             exinstingStatus.RemainingPeople = evacutionStatus.RemainingPeople ?? exinstingStatus.RemainingPeople;
             exinstingStatus.TotalEvacuated = evacutionStatus.TotalEvacuated ?? exinstingStatus.TotalEvacuated;
             exinstingStatus.LastVechicleUsed = evacutionStatus.LastVechicleUsed ?? exinstingStatus.LastVechicleUsed;
+            exinstingStatus.IsCompleted = evacutionStatus.IsCompleted;
+            exinstingStatus.Operations = evacutionStatus.Operations ?? exinstingStatus.Operations;
             await context.SaveChangesAsync();
             await tx.CommitAsync();
             return exinstingStatus;

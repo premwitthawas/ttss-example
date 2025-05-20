@@ -20,6 +20,9 @@ public class EvacutionZoneService(IEvacutionZoneRepository evacutionZoneReposito
             {
                 RemainingPeople = evacutionZoneDTO.NumberOfPeople,
                 TotalEvacuated = 0,
+                IsCompleted = false,
+                LastVechicleUsed = string.Empty,
+                Operations = "Waiting"
             }
         };
         await evacutionZoneRepository.InsertEvacutionZoneAsync(mapObject);
@@ -32,10 +35,9 @@ public class EvacutionZoneService(IEvacutionZoneRepository evacutionZoneReposito
         var zones = result.ToList()
         .OrderBy(x => x.CreatedAt)
         .OrderByDescending(x => x.UrgencyLevel)
-        .Where(x => x.EvacutionStatus!.RemainingPeople != 0);
+        .Where(x => x.EvacutionStatus!.RemainingPeople != 0 && x.EvacutionStatus!.IsCompleted == false);
         EvacutionZone zone = zones.ToArray()[0];
         bool isFirstPriority = zone.Equals(evacutionZone);
         return isFirstPriority;
-        // return false;
     }
 }

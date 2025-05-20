@@ -7,7 +7,7 @@ namespace EvacutionPlanningAndMonitoring.App.API.Services;
 public interface IEvavacutionStatusService
 {
     Task<ResponseDTO<List<ResponseEvacutionStatusDTO>>> GetEvacutionDefaultStatusesAsync();
-    Task<ResponseDTO<EvacutionStatusDTO>> UpdateEvacutionStatusAsync(EvacutionStatusDTO evacutionStatusDTO);
+    Task<ResponseDTO<EvacutionStatusDTO>> UpdateEvacutionStatusServiceAsync(EvacutionStatusDTO evacutionStatusDTO);
     Task<bool> UpdateRemainingPeopleAsync(string zoneId, int? people, string vehicle);
     Task<bool> UpdateRemainingReplacePeopleAsync(string zoneId, int? people,string vehicle);
     Task<bool> UpdateIsCompleteAsync(string zoneId,bool status);

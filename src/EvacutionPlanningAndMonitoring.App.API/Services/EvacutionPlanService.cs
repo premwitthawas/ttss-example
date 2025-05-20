@@ -2,6 +2,7 @@ using EvacutionPlanningAndMonitoring.App.API.DTOs;
 using EvacutionPlanningAndMonitoring.App.API.Helpers;
 using EvacutionPlanningAndMonitoring.App.API.Models;
 using EvacutionPlanningAndMonitoring.App.API.Repositories;
+using Serilog;
 
 namespace EvacutionPlanningAndMonitoring.App.API.Services;
 
@@ -25,12 +26,13 @@ public class EvacutionPlanService(
             if (plan.EvacutionZone != null)
             {
                 await evavacutionStatusService.UpdateRemainingReplacePeopleAsync(plan.ZoneID, plan.EvacutionZone.NumberOfPeople, plan.VehicleID);
-                await evavacutionStatusService.UpdateIsCompleteAsync(plan.ZoneID,false);
+                await evavacutionStatusService.UpdateIsCompleteAsync(plan.ZoneID, false);
                 await evavacutionStatusService.UpdateIsOperationsWattingsAsync(plan.ZoneID);
                 await vehicleService.UpdateVehicleStatusAsync(plan.VehicleID, false);
                 plan.ResetPlan();
                 await evacutionPlanRepository.UpdateEvacutionPlanAsync(plan);
                 await cachingEvacutionStatusService.RemoveEvacutionStatuseByZoneIdCaching(plan.ZoneID);
+                Log.Information($"Clear Evacution Plane ZoneId: {plan.ZoneID} | VehicleID: {plan.VehicleID} ");
             }
         }
     }
@@ -51,16 +53,16 @@ public class EvacutionPlanService(
         {
             return new ResponseDTO<EvacutionPlanDTO>(true, 400, null, "Vehicle Capacity it's less then NumberOfPeopleEvacuted");
         }
-        Vehicle? vehicleOptimize = await vehicleService.OptimizeCapacityVehicleToZone(evacutionZone, evacutionPlanDTO.NumberOfPeople);
-        if (vehicleOptimize == null)
-        {
-            return new ResponseDTO<EvacutionPlanDTO>(true, 400, null, "Vehicle is not avaliable please try again next time.");
-        }
-        bool isVehicleOptimize = vehicleOptimize.Equals(vehicle);
-        if (!isVehicleOptimize)
-        {
-            return new ResponseDTO<EvacutionPlanDTO>(true, 400, null, "Please Assign Vehicle " + vehicleOptimize.VehicleID);
-        }
+        // Vehicle? vehicleOptimize = await vehicleService.OptimizeCapacityVehicleToZone(evacutionZone, evacutionPlanDTO.NumberOfPeople);
+        // if (vehicleOptimize == null)
+        // {
+        //     return new ResponseDTO<EvacutionPlanDTO>(true, 400, null, "Vehicle is not avaliable please try again next time.");
+        // }
+        // bool isVehicleOptimize = vehicleOptimize.Equals(vehicle);
+        // if (!isVehicleOptimize)
+        // {
+        //     return new ResponseDTO<EvacutionPlanDTO>(true, 400, null, "Please Assign Vehicle " + vehicleOptimize.VehicleID);
+        // }
         bool isPriorityZoneCanUse = await evacutionZoneService.FindPriorityUrgencyEvacutionZoneAsync(evacutionZone);
         if (!isPriorityZoneCanUse)
         {
@@ -90,6 +92,7 @@ public class EvacutionPlanService(
             return new ResponseDTO<EvacutionPlanDTO>(true, 400, null, "Can't Update Vehicle Status.");
         }
         var mapResult = new EvacutionPlanDTO(result.ZoneID, result.VehicleID, result.ETA, result.NumberOfPeople);
+        Log.Information($"Create Evacution Plane ZoneId: {result.ZoneID} | VehicleID: {result.VehicleID} | ETA: {result.ETA}");
         return new ResponseDTO<EvacutionPlanDTO>(false, 201, mapResult, null);
     }
 
