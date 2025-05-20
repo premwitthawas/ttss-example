@@ -25,6 +25,7 @@ public class EvacutionPlanService(
         {
             if (plan.EvacutionZone != null)
             {
+                System.Console.WriteLine("Clear ALL");
                 await evavacutionStatusService.UpdateRemainingReplacePeopleAsync(plan.ZoneID, plan.EvacutionZone.NumberOfPeople, plan.VehicleID);
                 await evavacutionStatusService.UpdateIsCompleteAsync(plan.ZoneID, false);
                 await evavacutionStatusService.UpdateIsOperationsWattingsAsync(plan.ZoneID);
@@ -53,16 +54,16 @@ public class EvacutionPlanService(
         {
             return new ResponseDTO<EvacutionPlanDTO>(true, 400, null, "Vehicle Capacity it's less then NumberOfPeopleEvacuted");
         }
-        // Vehicle? vehicleOptimize = await vehicleService.OptimizeCapacityVehicleToZone(evacutionZone, evacutionPlanDTO.NumberOfPeople);
-        // if (vehicleOptimize == null)
-        // {
-        //     return new ResponseDTO<EvacutionPlanDTO>(true, 400, null, "Vehicle is not avaliable please try again next time.");
-        // }
-        // bool isVehicleOptimize = vehicleOptimize.Equals(vehicle);
-        // if (!isVehicleOptimize)
-        // {
-        //     return new ResponseDTO<EvacutionPlanDTO>(true, 400, null, "Please Assign Vehicle " + vehicleOptimize.VehicleID);
-        // }
+        Vehicle? vehicleOptimize = await vehicleService.OptimizeCapacityVehicleToZone(evacutionZone, evacutionPlanDTO.NumberOfPeople);
+        if (vehicleOptimize == null)
+        {
+            return new ResponseDTO<EvacutionPlanDTO>(true, 400, null, "Vehicle is not avaliable please try again next time.");
+        }
+        bool isVehicleOptimize = vehicleOptimize.Equals(vehicle);
+        if (!isVehicleOptimize)
+        {
+            return new ResponseDTO<EvacutionPlanDTO>(true, 400, null, "Please Assign Vehicle " + vehicleOptimize.VehicleID);
+        }
         bool isPriorityZoneCanUse = await evacutionZoneService.FindPriorityUrgencyEvacutionZoneAsync(evacutionZone);
         if (!isPriorityZoneCanUse)
         {
@@ -117,7 +118,7 @@ public class EvacutionPlanService(
         {
             return new ResponseDTO<EvacutionPlanDTO>(true, 404, null, "EvacutionPlan Not found | Please Add EvacutionPlan Before Update.");
         }
-        planExist.NumberOfPeople = evacutionPlantUpdateDTO.NumberOfPeople;
+        planExist.NumberOfPeople = evacutionPlantUpdateDTO.NumberOfPeople ?? vehicle.Capacity;
         planExist.ZoneID = evacutionPlantUpdateDTO.ZoneID ?? planExist.ZoneID;
         planExist.VehicleID = evacutionPlantUpdateDTO.VehicleID;
         if (planExist.Vehicle == null && planExist.EvacutionZone == null)
@@ -126,7 +127,7 @@ public class EvacutionPlanService(
         }
         planExist.ETA = calculateDistanceHelper.CalculateETAOfEvacutionPlan(vehicle, evacutionZone);
         var result = await evacutionPlanRepository.UpdateEvacutionPlanAsync(planExist);
-        bool isUpdatePeopleRemaining = await evavacutionStatusService.UpdateRemainingPeopleAsync(result.ZoneID, vehicle.Capacity, result.VehicleID);
+        bool isUpdatePeopleRemaining = await evavacutionStatusService.UpdateRemainingPeopleAsync(result.ZoneID, evacutionPlantUpdateDTO.NumberOfPeople ?? vehicle.Capacity, result.VehicleID);
         if (!isUpdatePeopleRemaining)
         {
             return new ResponseDTO<EvacutionPlanDTO>(true, 400, null, "People remaining less than base capacity of vehicle");
