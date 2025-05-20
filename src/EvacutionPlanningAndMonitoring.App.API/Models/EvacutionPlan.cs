@@ -8,7 +8,6 @@ public class EvacutionPlan : BaseModelDate
     public Vehicle? Vehicle { get; set; }
     public string ETA { get; set; } = string.Empty;
     public int? NumberOfPeople { get; set; }
-
     public void ResetPlan()
     {
         this.UpdatedAt = DateTime.UtcNow;

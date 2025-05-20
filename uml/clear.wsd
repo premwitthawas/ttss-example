@@ -1,0 +1,29 @@
+@startuml
+actor User
+participant "EvacutionsAPI Controller " as API
+participant "CachingEvacutionStatusService Layer" as ServiceCache
+participant "EvacutionPlanService Layer" as ServicePlan
+participant "EvacutionStatusServiceLayer" as ServiceStatus
+participant "VehicleService Layer" as ServiceVehicle
+participant "EvacutionPlanRepository Layer" as RepoPlan
+User -> API : DELTE /api/evacutions/clear
+API -> ServicePlan : ClearEvacutionPlansAsync()
+ServicePlan -> RepoPlan : SelectAllEvacutionPlanAsync()
+RepoPlan --> ServicePlan : Return List<EvacutionPlan>
+ServicePlan -> ServiceStatus : UpdateRemainingReplacePeopleAsync(plan.ZoneID,plan.EvacutionZone.NumberOfPeople,plan.VehicleID)
+ServiceStatus --> ServicePlan : Return boolean
+ServicePlan -> ServiceStatus: UpdateIsCompleteAsync(plan.ZoneID, false)
+ServiceStatus --> ServicePlan : Return boolean
+ServicePlan -> ServiceStatus : UpdateIsOperationsWattingsAsync(plan.ZoneID)
+ServiceStatus --> ServicePlan : Return boolean
+ServicePlan -> ServiceVehicle : UpdateVehicleStatusAsync(plan.VehicleID, false)
+ServiceVehicle -->  ServicePlan: Reture boolean
+ServicePlan -> RepoPlan : UpdateEvacutionPlanAsync(plan)
+RepoPlan -> Database : Update Data
+Database --> RepoPlan : Success
+RepoPlan --> ServicePlan : Success
+ServicePlan -> ServiceCache: RemoveEvacutionStatuseByZoneIdCaching(plan.ZoneID)
+ServiceCache --> ServicePlan: Cache Clear
+ServicePlan --> API : Return Created EvacutionPlanDTO
+API --> User : HTTP 200 Successfully
+@enduml

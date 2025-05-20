@@ -5,7 +5,6 @@
 
 # dotenv files
 .env
-uml
 # User-specific files
 *.rsuser
 *.suo

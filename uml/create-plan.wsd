@@ -1,0 +1,40 @@
+@startuml
+actor User
+participant "EvacutionsAPI Controller " as API
+participant "EvacutionPlanService Layer" as ServicePlan
+participant "CachingEvacutionStatusService Layer" as ServiceCache
+participant "EvavacutionStatusService Layer" as ServiceStatus
+participant "EvacutionZoneService Layer" as ServiceZone
+participant "EvacutionPlanService Layer" as ServiceVehicle
+participant "CalculateDistanceHelper Layer" as Helper
+participant "EvacutionPlanRepository Layer" as RepoPlan
+participant Database
+User -> API : POST /api/evacutions/plan (EvacutionPlanDTO)
+alt Valid VehicleDTO
+    API -> ServicePlan : CreateEvacutionPlanAsync(EvacutionPlanDTO)
+    ServicePlan -> ServiceVehicle : GetVehicleByIdAsync(EvacutionPlanDTO.VihicleID)
+    ServiceVehicle --> ServicePlan : Return Vehicle
+    ServicePlan -> ServiceZone : GetEvacutionZoneByIdAsync(EvacutionPlanDTO.ZoneID)
+    ServiceZone --> ServicePlan : Return EvacutionZone
+    ServicePlan -> ServiceVehicle: OptimizeCapacityVehicleToZone(EvacutionZone,EvacutionPlanDTO.NumberOfPeople)
+    ServiceVehicle --> ServicePlan : Return VehicleID
+    ServicePlan -> ServiceZone : FindPriorityUrgencyEvacutionZoneAsync(EvacutionZone)
+    ServiceZone --> ServicePlan : Return isPriorityZoneCanUse boolean
+    ServicePlan -> Helper : CalculateETAOfEvacutionPlan(Vehicle, EvacutionZone)
+    Helper -->  ServicePlan: Reture ETA Calculation
+    ServicePlan -> RepoPlan : InsertEvacutionPlanAsync(EvacutionZone)
+    RepoPlan -> Database : Insert Data
+    Database --> RepoPlan : Success
+    RepoPlan --> ServicePlan : Success
+   ServicePlan -> ServiceStatus : UpdateRemainingPeopleAsync(result.ZoneID, evacutionPlantUpdateDTO.NumberOfPeople ?? vehicle.Capacity, result.VehicleID)
+    ServiceStatus -> ServiceCache : Invalidate CacheStatus Set NewStatatus
+    ServiceCache --> ServiceStatus: Success
+    ServiceStatus --> ServicePlan: Return Boolean
+    ServicePlan -> ServiceVehicle: UpdateVehicleStatusAsync(VehicleID,true)
+    ServiceVehicle --> ServicePlan : Return isUpdateStatusVehicle boolean
+    ServicePlan --> API : Return Created EvacutionPlanDTO
+    API --> User : HTTP 201 Created
+else Invalid VehicleDTO
+    API --> User : HTTP 400 Bad Request
+end
+@enduml

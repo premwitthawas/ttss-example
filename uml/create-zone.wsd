@@ -1,0 +1,19 @@
+@startuml
+actor User
+participant "EvacutionZoneController API Controller " as API
+participant "EvacutionZoneService Service Layer" as Service
+participant "EvacutionZoneRepository Layer" as Repo
+participant Database
+User -> API : POST /api/evacution-zones (EvacutionZoneDTO)
+alt Valid VehicleDTO
+API -> Service : CreateEvacutionZoneAsync(EvacutionZoneDTO)
+Service -> Repo : InsertEvacutionZoneAsync(EvacutionZone)
+Repo -> Database : Insert Data
+Database --> Repo : Success
+Repo --> Service : Success
+Service --> API : Return Created EvacutionZoneDTO
+API --> User : HTTP 201 Created
+else Invalid VehicleDTO
+API --> User : HTTP 400 Bad Request
+end
+@enduml

@@ -1,0 +1,23 @@
+@startuml
+actor User
+participant "EvacutionsAPI Controller " as API
+participant "CachingEvacutionStatusService Layer" as ServiceCache
+participant "EvavacutionStatusService Layer" as ServiceStatus
+participant "EvacutionStatusRepository Layer" as RepoStatus
+participant Database
+User -> API : GET /api/evacutions/status ()
+API -> ServiceStatus : GetEvacutionDefaultStatusesAsync()
+ServiceStatus -> RepoStatus : SelectAllIdsEvacutionDStatusAsync()
+RepoStatus --> ServiceStatus : Return List<String> Status Id
+ServiceStatus -> ServiceCache : Check Cache each
+alt Cache Hit
+    ServiceCache --> ServiceStatus: Add to List
+else Cache Miss
+    ServiceStatus -> RepoStatus: SelectEvacutionStatusByIdAsync(id)
+    RepoStatus -->  ServiceStatus: Add ToLists
+    ServiceStatus --> ServiceCache: SetCache SetEvacutionStatusByZoneId(id);
+    ServiceCache --> ServiceStatus: Success
+end
+ServiceStatus --> API: List Status Cache
+API --> User : HTTP 200 Successfully
+@enduml

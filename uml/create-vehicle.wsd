@@ -1,0 +1,19 @@
+@startuml
+actor User
+participant "VehicleController API Controller " as API
+participant "VehicleService Service Layer" as Service
+participant "VehicleRepository Layer" as Repo
+participant Database
+User -> API : POST /api/vehicle (VehicleDTO)
+alt Valid VehicleDTO
+API -> Service : CreateVehicleAsync(VehicleDTO)
+Service -> Repo : InsertVehicleAsync(Vehicle)
+Repo -> Database : Insert Data
+Database --> Repo : Success
+Repo --> Service : Success
+Service --> API : Return Created VehicleDTO
+API --> User : HTTP 201 Created
+else Invalid VehicleDTO
+API --> User : HTTP 400 Bad Request
+end
+@enduml
