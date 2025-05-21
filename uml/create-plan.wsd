@@ -1,40 +1,68 @@
 @startuml
 actor User
+box "Controller" #LightBlue
 participant "EvacutionsAPI Controller " as API
+end box
+box "PlanService" #LightGray
 participant "EvacutionPlanService Layer" as ServicePlan
+end box
+box "CachingService" #LightSalmon
 participant "CachingEvacutionStatusService Layer" as ServiceCache
+end box
+box "StatusService" #LightGreen
 participant "EvavacutionStatusService Layer" as ServiceStatus
+end box
+box "ZoneService" #LightPink
 participant "EvacutionZoneService Layer" as ServiceZone
+end box
+box "VehicleService" #LightSeaGreen
 participant "EvacutionPlanService Layer" as ServiceVehicle
+end box
+box "DistanceHelper" #LightSteelBlue
 participant "CalculateDistanceHelper Layer" as Helper
+end box
+box "PlanRepository" #LightYellow
 participant "EvacutionPlanRepository Layer" as RepoPlan
+end box
 participant Database
 User -> API : POST /api/evacutions/plan (EvacutionPlanDTO)
-alt Valid VehicleDTO
+alt Valid EvacutionPlanDTO
     API -> ServicePlan : CreateEvacutionPlanAsync(EvacutionPlanDTO)
+    group Process Vehicle
     ServicePlan -> ServiceVehicle : GetVehicleByIdAsync(EvacutionPlanDTO.VihicleID)
     ServiceVehicle --> ServicePlan : Return Vehicle
-    ServicePlan -> ServiceZone : GetEvacutionZoneByIdAsync(EvacutionPlanDTO.ZoneID)
-    ServiceZone --> ServicePlan : Return EvacutionZone
     ServicePlan -> ServiceVehicle: OptimizeCapacityVehicleToZone(EvacutionZone,EvacutionPlanDTO.NumberOfPeople)
     ServiceVehicle --> ServicePlan : Return VehicleID
+    end group
+    group process Zone
+    ServicePlan -> ServiceZone : GetEvacutionZoneByIdAsync(EvacutionPlanDTO.ZoneID)
+    ServiceZone --> ServicePlan : Return EvacutionZone
     ServicePlan -> ServiceZone : FindPriorityUrgencyEvacutionZoneAsync(EvacutionZone)
     ServiceZone --> ServicePlan : Return isPriorityZoneCanUse boolean
+    end group
+    group process Insert Plan
     ServicePlan -> Helper : CalculateETAOfEvacutionPlan(Vehicle, EvacutionZone)
     Helper -->  ServicePlan: Reture ETA Calculation
     ServicePlan -> RepoPlan : InsertEvacutionPlanAsync(EvacutionZone)
     RepoPlan -> Database : Insert Data
     Database --> RepoPlan : Success
     RepoPlan --> ServicePlan : Success
-   ServicePlan -> ServiceStatus : UpdateRemainingPeopleAsync(result.ZoneID, evacutionPlantUpdateDTO.NumberOfPeople ?? vehicle.Capacity, result.VehicleID)
+    end group
+    group Update Status And Caching
+    ServicePlan -> ServiceStatus : UpdateRemainingPeopleAsync(result.ZoneID, evacutionPlantUpdateDTO.NumberOfPeople ?? vehicle.Capacity, result.VehicleID)
+    ServiceStatus -> Database: Update Success
+    Database --> ServiceStatus: Success
     ServiceStatus -> ServiceCache : Invalidate CacheStatus Set NewStatatus
     ServiceCache --> ServiceStatus: Success
     ServiceStatus --> ServicePlan: Return Boolean
     ServicePlan -> ServiceVehicle: UpdateVehicleStatusAsync(VehicleID,true)
+    ServiceVehicle -> Database : Update Data success
+    Database --> ServiceVehicle: Success
     ServiceVehicle --> ServicePlan : Return isUpdateStatusVehicle boolean
+    end group
     ServicePlan --> API : Return Created EvacutionPlanDTO
     API --> User : HTTP 201 Created
-else Invalid VehicleDTO
+else Invalid EvacutionPlanDTO
     API --> User : HTTP 400 Bad Request
 end
 @enduml

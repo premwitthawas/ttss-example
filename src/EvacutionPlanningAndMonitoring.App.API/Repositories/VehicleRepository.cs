@@ -38,10 +38,11 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
             await tx.CommitAsync();
             return true;
         }
-        catch (Exception ex)
+        catch
         {
             await tx.RollbackAsync();
-            throw new Exception(ex.Message);
+            // throw new Exception(ex.Message);
+            return false;
         }
     }
 };

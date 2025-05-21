@@ -84,7 +84,9 @@ public class EvacutionPlanService(
         {
             return new ResponseDTO<EvacutionPlanDTO>(true, 400, null, "Can't Update Evacution Status.");
         }
+        Console.WriteLine("[DEBUG] Before UpdateVehicleStatusAsync");
         bool isUpdateStatusVehicle = await vehicleService.UpdateVehicleStatusAsync(vehicle.VehicleID, true);
+        Console.WriteLine("[DEBUG] After UpdateVehicleStatusAsync");
         if (!isUpdateStatusVehicle)
         {
             return new ResponseDTO<EvacutionPlanDTO>(true, 400, null, "Can't Update Vehicle Status.");
